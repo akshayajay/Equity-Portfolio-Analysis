@@ -16,7 +16,7 @@ def top10stocks(n_years):
     end_date = datetime.date(2015 + n_years - 1, 12, 31)
     
     # Restrict the end date to June 22, 2023
-    end_date = min(end_date, datetime.date(2023, 6, 22))
+    end_date = datetime.date.today()
     
     # Download historical data for the specified companies
     stock_data = {}
