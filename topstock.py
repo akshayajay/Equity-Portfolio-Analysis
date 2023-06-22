@@ -12,11 +12,12 @@ def top10stocks(n_years):
                      'UPL.NS', 'ULTRACEMCO.NS', 'WIPRO.NS']
     
     # User input for the number of years
-    start_date = datetime.date(2015, 1, 1)
-    end_date = datetime.date(2015 + n_years - 1, 12, 31)
+    start_year = 2015
+    start_date = datetime.date(start_year, 1, 1)
+    end_date = datetime.date(start_year + n_years - 1, 12, 31)
     
     # Restrict the end date to June 22, 2023
-    end_date = max(end_date,datetime.date.today())
+    end_date = min(end_date, datetime.date.today())
     
     # Download historical data for the specified companies
     stock_data = {}
@@ -39,11 +40,9 @@ def top10stocks(n_years):
         returns = (end_price - start_price) / start_price * 100
         returns_dict[symbol] = returns
     
-    # Sort the companies based on returns
+     # Sort the companies based on returns
     sorted_returns = sorted(returns_dict.items(), key=lambda x: x[1], reverse=True)
     
     # Get the top 10 performing companies
     top_10_companies = [company[0] for company in sorted_returns[:10]]
-    top_10_returns = [company[1] for company in sorted_returns[:10]]
     return top_10_companies 
-    return top_10_returns
