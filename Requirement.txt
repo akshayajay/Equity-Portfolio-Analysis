@@ -1,8 +1,0 @@
-import streamlit as st
-import numpy as np
-import altair as alt
-import yfinance as yf
-import datetime
-import pandas as pd
-from topstock import top10stocks
-import matplotlib.pyplot as plt
