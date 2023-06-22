@@ -24,12 +24,11 @@ stock_symbols = top10stocks(n_years)
 start_date = start_date.strftime('%Y-%m-%d')
 end_date = end_date.strftime('%Y-%m-%d')
 
-try:
-    # Download Nifty index data
-    nifty_data = yf.download('^NSEI', start=start_date, end=end_date, progress=False)
+# Download Nifty index data
+nifty_data = yf.download('^NSEI', start=start_date, end=end_date, progress=False)
 
-    # Download stock data for the selected symbols
-    stock_data = yf.download(stock_symbols, start=start_date, end=end_date, progress=False)
+# Download stock data for the selected symbols
+stock_data = yf.download(stock_symbols, start=start_date, end=end_date, progress=False)
 # Calculate the equity curve for the benchmark strategy
 stock_prices = stock_data['Adj Close']
 benchmark_symbols = ['ADANIENT.NS', 'ADANIPORTS.NS', 'APOLLOHOSP.NS', 'ASIANPAINT.NS', 'AXISBANK.NS', 'BAJAJ-AUTO.NS', 'BAJFINANCE.NS',             
