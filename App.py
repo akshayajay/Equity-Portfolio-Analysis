@@ -12,7 +12,7 @@ st.title("Equity Portfolio Analysis")
 st.write("This app calculates and visualizes the equity curves of different portfolio strategies.")
 
 # User-adjustable parameters
-start_date = st.date_input("Start Date", value=datetime.date(2020, 01, 1), min_value=datetime.date(2020, 1, 1), max_value=datetime.date.today()
+start_date = st.date_input("Start Date", value=datetime.date(2020, 1, 1), min_value=datetime.date(2020, 1, 1), max_value=datetime.date.today()
 end_date = st.date_input("End Date", value=datetime.date.today(), min_value=datetime.date(2021, 1, 1), max_value=datetime.date.today()
 performance_days = st.slider("Performance Days", min_value=1, max_value=500, value=100)
 top_stock_count = st.slider("Top Stock Count", min_value=1, max_value=10, value=10)
