@@ -13,7 +13,7 @@ st.write("This app calculates and visualizes the equity curves of different port
 
 # User-adjustable parameters
 start_date = st.date_input("Start Date", value=datetime.date(2020, 10, 1), min_value=datetime.date(2020, 1, 1), max_value=datetime.date(2023, 6, 13))
-end_date = st.date_input("End Date", value=datetime.date(2023, 6, 13), min_value=datetime.date(2015, 1, 1), max_value=datetime.date(2023, 6, 13))
+end_date = st.date_input("End Date", value=datetime.date.today(), min_value=datetime.date(2015, 1, 1), max_value=datetime.date.today()
 performance_days = st.slider("Performance Days", min_value=1, max_value=500, value=100)
 top_stock_count = st.slider("Top Stock Count", min_value=1, max_value=10, value=10)
 initial_equity = st.number_input("Initial Equity", min_value=1000, max_value=10000000, value=1000000, step=1000)
