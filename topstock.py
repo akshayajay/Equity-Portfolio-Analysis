@@ -12,17 +12,17 @@ def top10stocks(n_years):
                      'UPL.NS', 'ULTRACEMCO.NS', 'WIPRO.NS']
     
     # User input for the number of years
-    tstart_date = datetime.date(2015, 1, 1)
-    tend_date = datetime.date(2015 + n_years - 1, 12, 31)
+    start_date = datetime.date(2015, 1, 1)
+    end_date = datetime.date(2015 + n_years - 1, 12, 31)
     
     # Restrict the end date to June 22, 2023
-    tend_date = min(tend_date, datetime.date(2023, 6, 22))
+    end_date = min(end_date, datetime.date(2023, 6, 22))
     
     # Download historical data for the specified companies
     stock_data = {}
     for symbol in stock_symbols:
         try:
-            data = yf.download(symbol, start=tstart_date, end=tend_date, progress=False)
+            data = yf.download(symbol, start=start_date, end=end_date, progress=False)
             if len(data) > 0:  # Check if data is available for the symbol
                 stock_data[symbol] = data
             else:
