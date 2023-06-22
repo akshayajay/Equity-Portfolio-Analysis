@@ -67,7 +67,7 @@ plt.legend()
 plt.grid(True)
 
 # Display the plots
-st.pyplot(plt)
+st.line_chart(plt)
 
 # Display the stocks selected for the sample strategy
 st.write("Stocks selected for the sample strategy:")
