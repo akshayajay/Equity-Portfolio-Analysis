@@ -106,23 +106,6 @@ benchmark_data = benchmark_portfolio.reset_index().rename(columns={'index': 'Dat
 sample_data = sample_portfolio.reset_index().rename(columns={'index': 'Date', 0: 'Equity'})
 nifty_data = nifty_portfolio.reset_index().rename(columns={'index': 'Date', 0: 'Equity'})
 
-# Create Altair Chart
-chart = alt.Chart(pd.concat([benchmark_data, sample_data, nifty_data])).mark_line().encode(
-    x='Date',
-    y='Equity',
-    color=alt.Color('category:N', legend=alt.Legend(title='Portfolio')),
-).properties(
-    width=600,
-    height=400,
-    title='Portfolio Equity Curve'
-).configure_legend(
-    orient='top'
-).configure_axis(
-    grid=True
-)
-
-# Display the Altair Chart
-st.altair_chart(chart, use_container_width=True)
 # Create DataFrame for CAGR values
 cagr_df = pd.DataFrame({'Company': sample_stocks, 'CAGR': sample_returns.values})
 (sample_portfolio[-1] / sample_portfolio[0]) ** (252 / len(sample_portfolio)) - 1
