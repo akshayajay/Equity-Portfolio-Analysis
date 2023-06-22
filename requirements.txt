@@ -1,7 +1,6 @@
-altair
-pandas
-streamlit
-numpy
-yfinance
-datetime
-matplotlib.pyplot
+streamlit==0.88.0
+numpy==1.21.0
+altair==4.1.0
+yfinance==0.1.63
+pandas==1.3.0
+matplotlib==3.4.3
