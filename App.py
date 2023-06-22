@@ -5,6 +5,7 @@ import yfinance as yf
 import datetime
 import pandas as pd
 from topstock import top10stocks
+import altair as alt
 
 # Streamlit app title and description
 st.title("Equity Portfolio Analysis")
@@ -101,7 +102,6 @@ df = pd.DataFrame(data)
 # Display the table
 st.write("Performance Metrics:")
 st.table(df)
- Convert pandas DataFrame to Altair Data format
 benchmark_data = benchmark_portfolio.reset_index().rename(columns={'index': 'Date', 0: 'Equity'})
 sample_data = sample_portfolio.reset_index().rename(columns={'index': 'Date', 0: 'Equity'})
 nifty_data = nifty_portfolio.reset_index().rename(columns={'index': 'Date', 0: 'Equity'})
