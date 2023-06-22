@@ -108,7 +108,7 @@ sample_cagr_df = pd.DataFrame({'Company': sample_portfolio.index, 'CAGR': sample
 
 # Bar graph for sample portfolio's CAGR
 bar_chart_sample_cagr = alt.Chart(sample_cagr_df).mark_bar().encode(
-    x=alt.Y('Company', sort='-x'),
+    x=alt.X('Company', sort='-x'),
     y='CAGR'
 )
 
