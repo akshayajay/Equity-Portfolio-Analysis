@@ -1,0 +1,7 @@
+altair
+pandas
+streamlit
+numpy
+yfinance
+datetime
+matplotlib.pyplot
