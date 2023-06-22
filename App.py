@@ -1,3 +1,4 @@
+Copy code
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,22 +14,23 @@ st.write("This app calculates and visualizes the equity curves of different port
 
 # User-adjustable parameters
 start_date = st.date_input("Start Date", value=datetime.date(2020, 10, 1), min_value=datetime.date(2020, 1, 1), max_value=datetime.date(2023, 6, 13))
-end_date = st.date_input("End Date", value=datetime.date.today(), min_value=datetime.date(2015, 1, 1), max_value=datetime.date.today()
+end_date = st.date_input("End Date", value=datetime.date.today(), min_value=datetime.date(2015, 1, 1), max_value=datetime.date.today())
 performance_days = st.slider("Performance Days", min_value=1, max_value=500, value=100)
 top_stock_count = st.slider("Top Stock Count", min_value=1, max_value=10, value=10)
 initial_equity = st.number_input("Initial Equity", min_value=1000, max_value=10000000, value=1000000, step=1000)
-n_years = st.number_input("Number of years from 2015 for which historical data will be analysed to pick the top ten stocks", min_value=1, max_value=8, value=1, step=1)
+n_years = st.number_input("Number of years from 2015 for which historical data will be analyzed to pick the top ten stocks", min_value=1, max_value=8, value=1, step=1)
 stock_symbols = top10stocks(n_years)
 
 # Convert np.datetime64 to datetime.date
 start_date = start_date.strftime('%Y-%m-%d')
 end_date = end_date.strftime('%Y-%m-%d')
 
-# Download Nifty index data
-nifty_data = yf.download('^NSEI', start=start_date, end=end_date, progress=False)
+try:
+    # Download Nifty index data
+    nifty_data = yf.download('^NSEI', start=start_date, end=end_date, progress=False)
 
-# Download stock data for the selected symbols
-stock_data = yf.download(stock_symbols, start=start_date, end=end_date, progress=False)
+    # Download stock data for the selected symbols
+    stock_data = yf.download(stock_symbols, start=start_date, end=end_date, progress=False)
 
 # Calculate the equity curve for the benchmark strategy
 stock_prices = stock_data['Adj Close']
