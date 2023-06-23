@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-import yfinance as yf
+from yahoofinancials import YahooFinancials
 import datetime
 import pandas as pd
 from topstock import top10stocks
@@ -25,13 +25,16 @@ start_date = start_date.strftime('%Y-%m-%d')
 end_date = end_date.strftime('%Y-%m-%d')
 
 # Download Nifty index data
-nifty_data = yf.download('^NSEI', start=start_date, end=end_date, progress=False)
+yahoo_financials_nifty = YahooFinancials('^NSEI')
+nifty_data = yahoo_financials_nifty.get_historical_price_data(start_date, end_date, 'daily')
+nifty_prices = pd.DataFrame({symbol: data['adjclose'] for symbol, data in nifty_data.items()})
 
 # Download stock data for the selected symbols
-stock_data = yf.download(stock_symbols, start=start_date, end=end_date, progress=False)
+yahoo_financials_stocks = YahooFinancials(stock_symbols)
+stock_data = yahoo_financials_stocks.get_historical_price_data(start_date, end_date, 'daily')
+stock_prices = pd.DataFrame({symbol: data['adjclose'] for symbol, data in stock_data.items()})
 
 # Calculate the equity curve for the benchmark strategy
-stock_prices = stock_data['Adj Close']
 benchmark_symbols = ['ADANIENT.NS', 'ADANIPORTS.NS', 'APOLLOHOSP.NS', 'ASIANPAINT.NS', 'AXISBANK.NS', 'BAJAJ-AUTO.NS', 'BAJFINANCE.NS',             
                                  'BAJAJFINSV.NS', 'BPCL.NS', 'BHARTIARTL.NS', 'BRITANNIA.NS', 'CIPLA.NS', 'COALINDIA.NS', 'DIVISLAB.NS', 'DRREDDY.NS',             
                                  'EICHERMOT.NS', 'GRASIM.NS', 'HCLTECH.NS', 'HDFCBANK.NS', 'HDFCLIFE.NS', 'HEROMOTOCO.NS', 'HINDALCO.NS',             
@@ -40,10 +43,12 @@ benchmark_symbols = ['ADANIENT.NS', 'ADANIPORTS.NS', 'APOLLOHOSP.NS', 'ASIANPAIN
                                  'SBIN.NS', 'SUNPHARMA.NS', 'TCS.NS', 'TATACONSUM.NS', 'TATAMOTORS.NS', 'TATASTEEL.NS', 'TECHM.NS', 'TITAN.NS',             
                                  'UPL.NS', 'ULTRACEMCO.NS', 'WIPRO.NS']
 
-benchmark_data = yf.download(benchmark_symbols, start=start_date, end=end_date, progress=False)
-benchmark_prices = benchmark_data['Adj Close']
-benchmark_weights = initial_equity / len(benchmark_symbols)
-benchmark_portfolio = benchmark_weights * (benchmark_prices / benchmark_prices.iloc[0]).sum(axis=1)
+yahoo_financials_benchmark = YahooFinancials(benchmark_symbols)
+benchmark_data = yahoo_financials_benchmark.get_historical_price_data(start_date, end_date, 'daily')
+benchmark_prices = pd.DataFrame({symbol: data['adjclose'] for symbol, data in benchmark_data.items()})
+
+# Align the stock prices and benchmark prices DataFrame
+stock_prices = stock_prices.loc[:, benchmark_prices.columns]
 
 # Calculate the equity curve for the sample strategy
 returns = stock_prices.pct_change(periods=performance_days) + 1
@@ -53,8 +58,8 @@ sample_weights = initial_equity / top_stock_count
 sample_portfolio = sample_weights * (stock_prices[sample_stocks] / stock_prices.iloc[0]).sum(axis=1)
 
 # Calculate the equity curve for the Nifty index
-nifty_weights = initial_equity / nifty_data['Adj Close'].iloc[0]
-nifty_portfolio = nifty_weights * nifty_data['Adj Close']
+nifty_weights = initial_equity / nifty_prices.iloc[0]
+nifty_portfolio = nifty_weights * nifty_prices
 
 # Plot the equity curves
 plt.figure(figsize=(10, 6))
