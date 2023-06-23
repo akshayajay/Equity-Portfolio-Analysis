@@ -18,6 +18,7 @@ performance_days = st.slider("Performance Days", min_value=1, max_value=500, val
 top_stock_count = st.slider("Top Stock Count", min_value=1, max_value=10, value=10)
 initial_equity = st.number_input("Initial Equity", min_value=1000, max_value=10000000, value=1000000, step=1000)
 n_years = st.number_input("Number of years from 2015 for which historical data will be analysed to pick the top ten stocks", min_value=1, max_value=8, value=1, step=1)
+print("Run the application by pressing 'R' if it shows an error. The error is displayed due to a download error")
 stock_symbols = top10stocks(n_years)
 
 # Convert np.datetime64 to datetime.date
