@@ -25,7 +25,7 @@ start_date = start_date.strftime('%Y-%m-%d')
 end_date = end_date.strftime('%Y-%m-%d')
 
 # Download Nifty index data
-nifty_data = yf.download('NSEI', start=start_date, end=end_date, progress=False)
+nifty_data = yf.download('^NSEI', start=start_date, end=end_date, progress=False)
 
 # Download stock data for the selected symbols
 stock_data = yf.download(stock_symbols, start=start_date, end=end_date, progress=False)
