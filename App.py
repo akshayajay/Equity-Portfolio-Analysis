@@ -27,7 +27,7 @@ end_date = end_date.strftime('%Y-%m-%d')
 # Download Nifty index data
 yahoo_financials_nifty = YahooFinancials('^NSEI')
 nifty_data = yahoo_financials_nifty.get_historical_price_data(start_date, end_date, 'daily')
-nifty_prices = pd.DataFrame({symbol: data['Adj Close'] for symbol, data in nifty_data.items()})
+nifty_prices = pd.DataFrame({symbol: data['prices']['adjclose'] for symbol, data in nifty_data.items()})
 
 # Download stock data for the selected symbols
 yahoo_financials_stocks = YahooFinancials(stock_symbols)
