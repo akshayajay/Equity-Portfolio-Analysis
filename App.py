@@ -27,12 +27,12 @@ end_date = end_date.strftime('%Y-%m-%d')
 # Download Nifty index data
 yahoo_financials_nifty = YahooFinancials('^NSEI')
 nifty_data = yahoo_financials_nifty.get_historical_price_data(start_date, end_date, 'daily')
-nifty_prices = pd.DataFrame({symbol: data['adjclose'] for symbol, data in nifty_data.items()})
+nifty_prices = pd.DataFrame({symbol: data['Adj Close'] for symbol, data in nifty_data.items()})
 
 # Download stock data for the selected symbols
 yahoo_financials_stocks = YahooFinancials(stock_symbols)
 stock_data = yahoo_financials_stocks.get_historical_price_data(start_date, end_date, 'daily')
-stock_prices = pd.DataFrame({symbol: data['adjclose'] for symbol, data in stock_data.items()})
+stock_prices = pd.DataFrame({symbol: data['Adj Close'] for symbol, data in stock_data.items()})
 
 # Calculate the equity curve for the benchmark strategy
 benchmark_symbols = ['ADANIENT.NS', 'ADANIPORTS.NS', 'APOLLOHOSP.NS', 'ASIANPAINT.NS', 'AXISBANK.NS', 'BAJAJ-AUTO.NS', 'BAJFINANCE.NS',             
@@ -45,7 +45,7 @@ benchmark_symbols = ['ADANIENT.NS', 'ADANIPORTS.NS', 'APOLLOHOSP.NS', 'ASIANPAIN
 
 yahoo_financials_benchmark = YahooFinancials(benchmark_symbols)
 benchmark_data = yahoo_financials_benchmark.get_historical_price_data(start_date, end_date, 'daily')
-benchmark_prices = pd.DataFrame({symbol: data['adjclose'] for symbol, data in benchmark_data.items()})
+benchmark_prices = pd.DataFrame({symbol: data['Adj Close'] for symbol, data in benchmark_data.items()})
 
 # Align the stock prices and benchmark prices DataFrame
 stock_prices = stock_prices.loc[:, benchmark_prices.columns]
