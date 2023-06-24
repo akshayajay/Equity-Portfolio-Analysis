@@ -22,7 +22,7 @@ print("Run the application by pressing 'R' if it shows an error. The error is di
 stock_symbols = top10stocks(n_years)
 
 # Download Nifty index data
-nifty_data = yf.download('^NSEI', start=start_date, end=end_date, progress=False)
+nifty_data = yf.download('NSEI.BO', start=start_date, end=end_date, progress=False)
 
 # Download stock data for the selected symbols
 stock_data = yf.download(stock_symbols, start=start_date, end=end_date, progress=False)
