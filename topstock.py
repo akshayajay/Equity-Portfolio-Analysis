@@ -29,17 +29,18 @@ for symbol in stock_symbols:
         print(f"Failed to download data for symbol: {symbol}")
 
 # Calculate the percentage returns for each company
-returns_dict = {}
-for symbol, data in stock_data.items():
-    company_data = data['Close']
-    start_price = company_data.iloc[0]
-    end_price = company_data.iloc[-1]
-    returns = (end_price - start_price) / start_price * 100
-    returns_dict[symbol] = returns
-
-# Sort the companies based on returns
-sorted_returns = sorted(returns_dict.items(), key=lambda x: x[1], reverse=True)
-
-# Get the top 10 performing companies
-top_10_companies = [company[0] for company in sorted_returns[:10]]
-print(top_10_companies)
+  returns_dict = {}
+  for symbol, data in stock_data.items():
+      company_data = data['Close']
+      start_price = company_data.iloc[0]
+      end_price = company_data.iloc[-1]
+      returns = (end_price - start_price) / start_price * 100
+      returns_dict[symbol] = returns
+  
+  # Sort the companies based on returns
+  sorted_returns = sorted(returns_dict.items(), key=lambda x: x[1], reverse=True)
+  
+  # Get the top 10 performing companies
+  top_10_companies = [company[0] for company in sorted_returns[:10]]
+  return(top_10_companies)
+  
