@@ -21,10 +21,6 @@ n_years = st.number_input("Number of years from 2015 for which historical data w
 print("Run the application by pressing 'R' if it shows an error. The error is displayed due to a download error")
 stock_symbols = top10stocks(n_years)
 
-# Convert np.datetime64 to datetime.date
-start_date = start_date.strftime('%Y-%m-%d')
-end_date = end_date.strftime('%Y-%m-%d')
-
 # Download Nifty index data
 nifty_data = yf.download('^NSEI', start=start_date, end=end_date, progress=False)
 
