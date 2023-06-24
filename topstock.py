@@ -12,7 +12,7 @@ stock_symbols = ['ADANIENT', 'ADANIPORTS', 'APOLLOHOSP', 'ASIANPAINT', 'AXISBANK
                  'UPL', 'ULTRACEMCO', 'WIPRO']
 
 # User input for the number of years
-n_years = 5
+def top10stocks(n_years):
 start_date = datetime.date.today() - datetime.timedelta(days=n_years*365)
 end_date = datetime.date.today()
 
