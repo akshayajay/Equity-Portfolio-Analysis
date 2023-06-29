@@ -1,14 +1,14 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-from nsepy import get_history
+import yfinance as yf
 import datetime
 import pandas as pd
 from topstock import top10stocks
 import altair as alt
 
 # Streamlit app title and description
-st.title("Equity Portfolio Analyser")
+st.title("Equity Portfolio Analysis")
 st.write("This app calculates and visualizes the equity curves of different portfolio strategies.")
 
 # User-adjustable parameters
@@ -18,26 +18,29 @@ performance_days = st.slider("Performance Days", min_value=1, max_value=500, val
 top_stock_count = st.slider("Top Stock Count", min_value=1, max_value=10, value=10)
 initial_equity = st.number_input("Initial Equity", min_value=1000, max_value=10000000, value=1000000, step=1000)
 n_years = st.number_input("Number of years from 2015 for which historical data will be analysed to pick the top ten stocks", min_value=1, max_value=8, value=1, step=1)
-print("Run the application by pressing 'R' if it shows an error. The error is displayed due to a download error")
 stock_symbols = top10stocks(n_years)
 
+# Convert np.datetime64 to datetime.date
+start_date = start_date.strftime('%Y-%m-%d')
+end_date = end_date.strftime('%Y-%m-%d')
+
 # Download Nifty index data
-nifty_data = get_history(symbol="NIFTY", index=True, start=start_date, end=end_date)
+nifty_data = yf.download('^NSEI', start=start_date, end=end_date, progress=False)
 
 # Download stock data for the selected symbols
-stock_data = get_history(symbol=stock_symbols, index=False, start=start_date, end=end_date)
+stock_data = yf.download(stock_symbols, start=start_date, end=end_date, progress=False)
 
 # Calculate the equity curve for the benchmark strategy
 stock_prices = stock_data['Adj Close']
-benchmark_symbols = ['ADANIENT', 'ADANIPORTS', 'APOLLOHOSP', 'ASIANPAINT', 'AXISBANK', 'BAJAJ-AUTO', 'BAJFINANCE',
-                 'BAJAJFINSV', 'BPCL', 'BHARTIARTL', 'BRITANNIA', 'CIPLA', 'COALINDIA', 'DIVISLAB', 'DRREDDY',
-                 'EICHERMOT', 'GRASIM', 'HCLTECH', 'HDFCBANK', 'HDFCLIFE', 'HEROMOTOCO', 'HINDALCO',
-                 'HINDUNILVR', 'HDFC', 'ICICIBANK', 'ITC', 'INDUSINDBK', 'INFY', 'JSWSTEEL', 'KOTAKBANK',
-                 'LT', 'M&M', 'MARUTI', 'NTPC', 'NESTLEIND', 'ONGC', 'POWERGRID', 'RELIANCE', 'SBILIFE',
-                 'SBIN', 'SUNPHARMA', 'TCS', 'TATACONSUM', 'TATAMOTORS', 'TATASTEEL', 'TECHM', 'TITAN',
-                 'UPL', 'ULTRACEMCO', 'WIPRO']
+benchmark_symbols = ['ADANIENT.NS', 'ADANIPORTS.NS', 'APOLLOHOSP.NS', 'ASIANPAINT.NS', 'AXISBANK.NS', 'BAJAJ-AUTO.NS', 'BAJFINANCE.NS',             
+                                 'BAJAJFINSV.NS', 'BPCL.NS', 'BHARTIARTL.NS', 'BRITANNIA.NS', 'CIPLA.NS', 'COALINDIA.NS', 'DIVISLAB.NS', 'DRREDDY.NS',             
+                                 'EICHERMOT.NS', 'GRASIM.NS', 'HCLTECH.NS', 'HDFCBANK.NS', 'HDFCLIFE.NS', 'HEROMOTOCO.NS', 'HINDALCO.NS',             
+                                 'HINDUNILVR.NS', 'HDFC.NS', 'ICICIBANK.NS', 'ITC.NS', 'INDUSINDBK.NS', 'INFY.NS', 'JSWSTEEL.NS', 'KOTAKBANK.NS',             
+                                 'LT.NS', 'M&M.NS', 'MARUTI.NS', 'NTPC.NS', 'NESTLEIND.NS', 'ONGC.NS', 'POWERGRID.NS', 'RELIANCE.NS', 'SBILIFE.NS',             
+                                 'SBIN.NS', 'SUNPHARMA.NS', 'TCS.NS', 'TATACONSUM.NS', 'TATAMOTORS.NS', 'TATASTEEL.NS', 'TECHM.NS', 'TITAN.NS',             
+                                 'UPL.NS', 'ULTRACEMCO.NS', 'WIPRO.NS']
 
-benchmark_data = get_history(symbol=benchmark_symbols, index=False, start=start_date, end=end_date)
+benchmark_data = yf.download(benchmark_symbols, start=start_date, end=end_date, progress=False)
 benchmark_prices = benchmark_data['Adj Close']
 benchmark_weights = initial_equity / len(benchmark_symbols)
 benchmark_portfolio = benchmark_weights * (benchmark_prices / benchmark_prices.iloc[0]).sum(axis=1)
