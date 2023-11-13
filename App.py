@@ -1,4 +1,3 @@
-import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import yfinance as yf
@@ -7,28 +6,24 @@ import pandas as pd
 from topstock import top10stocks
 import altair as alt
 
-# Streamlit app title and description
-st.title("Equity Portfolio Analysis")
-st.write("This app calculates and visualizes the equity curves of different portfolio strategies.")
-
 # User-adjustable parameters
-start_date = st.date_input("Start Date", value=datetime.date(2020, 1, 1), min_value=datetime.date(2020, 1, 1), max_value=datetime.date.today())
-end_date = st.date_input("End Date", value=datetime.date.today(), min_value=datetime.date(2021, 1, 1), max_value=datetime.date.today())
-performance_days = st.slider("Performance Days", min_value=1, max_value=500, value=100)
-top_stock_count = st.slider("Top Stock Count", min_value=1, max_value=10, value=10)
-initial_equity = st.number_input("Initial Equity", min_value=1000, max_value=10000000, value=1000000, step=1000)
-n_years = st.number_input("Number of years from 2015 for which historical data will be analysed to pick the top ten stocks", min_value=1, max_value=8, value=1, step=1)
+start_date = datetime.date(2020, 1, 1)
+end_date = datetime.date.today()
+performance_days = 100
+top_stock_count = 10
+initial_equity = 1000000
+n_years = 1
 stock_symbols = top10stocks(n_years)
 
 # Convert np.datetime64 to datetime.date
-start_date = start_date.strftime('%Y-%m-%d')
-end_date = end_date.strftime('%Y-%m-%d')
+start_date_str = start_date.strftime('%Y-%m-%d')
+end_date_str = end_date.strftime('%Y-%m-%d')
 
 # Download Nifty index data
-nifty_data = yf.download('^NSEI', start=start_date, end=end_date, progress=False)
+nifty_data = yf.download('^NSEI', start=start_date_str, end=end_date_str, progress=False)
 
 # Download stock data for the selected symbols
-stock_data = yf.download(stock_symbols, start=start_date, end=end_date, progress=False)
+stock_data = yf.download(stock_symbols, start=start_date_str, end=end_date_str, progress=False)
 
 # Calculate the equity curve for the benchmark strategy
 stock_prices = stock_data['Adj Close']
@@ -40,7 +35,7 @@ benchmark_symbols = ['ADANIENT.NS', 'ADANIPORTS.NS', 'APOLLOHOSP.NS', 'ASIANPAIN
                                  'SBIN.NS', 'SUNPHARMA.NS', 'TCS.NS', 'TATACONSUM.NS', 'TATAMOTORS.NS', 'TATASTEEL.NS', 'TECHM.NS', 'TITAN.NS',             
                                  'UPL.NS', 'ULTRACEMCO.NS', 'WIPRO.NS']
 
-benchmark_data = yf.download(benchmark_symbols, start=start_date, end=end_date, progress=False)
+benchmark_data = yf.download(benchmark_symbols, start=start_date_str, end=end_date_str, progress=False)
 benchmark_prices = benchmark_data['Adj Close']
 benchmark_weights = initial_equity / len(benchmark_symbols)
 benchmark_portfolio = benchmark_weights * (benchmark_prices / benchmark_prices.iloc[0]).sum(axis=1)
@@ -67,18 +62,17 @@ plt.title('Portfolio Equity Curve')
 plt.legend()
 plt.grid(True)
 
-# Display the plots
-st.pyplot(plt)
+# Display the plot
+plt.show()
 
 # Display the stocks selected for the sample strategy
-st.write("Stocks selected for the sample strategy:")
-st.write(top10stocks(n_years))
+print("Stocks selected for the sample strategy:")
+print(top10stocks(n_years))
 
 # Calculate performance metrics
 benchmark_cagr = (benchmark_portfolio[-1] / benchmark_portfolio[0]) ** (252 / len(benchmark_portfolio)) - 1
 sample_cagr = (sample_portfolio[-1] / sample_portfolio[0]) ** (252 / len(sample_portfolio)) - 1
 nifty_cagr = (nifty_portfolio[-1] / nifty_portfolio[0]) ** (252 / len(nifty_portfolio)) - 1
-
 
 benchmark_volatility = np.std(benchmark_portfolio.pct_change()) * np.sqrt(252)
 sample_volatility = np.std(sample_portfolio.pct_change()) * np.sqrt(252)
@@ -100,8 +94,8 @@ data = {
 df = pd.DataFrame(data)
 
 # Display the table
-st.write("Performance Metrics:")
-st.table(df)
+print("Performance Metrics:")
+print(df)
 
 # Create DataFrame for sample portfolio's CAGR
 sample_cagr_df = pd.DataFrame({'Company': sample_portfolio.index, 'CAGR': sample_portfolio.values})
@@ -112,5 +106,6 @@ bar_chart_sample_cagr = alt.Chart(sample_cagr_df).mark_bar().encode(
     x=alt.X('Company', sort='-x')
 )
 
-st.write("Sample Portfolio - CAGR")
-st.altair_chart(bar_chart_sample_cagr, use_container_width=True)
+# Display the bar chart
+print("Sample Portfolio - CAGR")
+bar_chart_sample_cagr.show()
