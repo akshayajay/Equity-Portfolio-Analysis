@@ -16,13 +16,6 @@ All three are plotted as equity curves, and the app reports CAGR, annualised vol
 
 ---
 
-## Screenshots
-
-<!-- Add a screenshot here once you've run the app -->
-> Run the app locally and drop a screenshot here.
-
----
-
 ## Tech stack
 
 | Layer | Library |
