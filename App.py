@@ -1,111 +1,228 @@
+"""
+NIFTY50 Equity Portfolio Analyser
+----------------------------------
+Compares three strategies over a user-selected date range:
+  1. Equal-weight benchmark across all NIFTY50 constituents
+  2. Momentum strategy — top-N stocks by n-year historical return
+  3. NIFTY50 index (^NSEI) as a passive reference
+
+Run with:  streamlit run App.py
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import yfinance as yf
 import datetime
 import pandas as pd
-from topstock import top10stocks
 import altair as alt
+import streamlit as st
 
-# User-adjustable parameters
-start_date = datetime.date(2020, 1, 1)
-end_date = datetime.date.today()
-performance_days = 100
-top_stock_count = 10
-initial_equity = 1000000
-n_years = 1
-stock_symbols = top10stocks(n_years)
+from topstock import top10stocks, NIFTY50_SYMBOLS
+from utils import cagr, annualised_volatility, sharpe_ratio, max_drawdown
 
-# Convert np.datetime64 to datetime.date
-start_date_str = start_date.strftime('%Y-%m-%d')
-end_date_str = end_date.strftime('%Y-%m-%d')
-
-# Download Nifty index data
-nifty_data = yf.download('^NSEI', start=start_date_str, end=end_date_str, progress=False)
-
-# Download stock data for the selected symbols
-stock_data = yf.download(stock_symbols, start=start_date_str, end=end_date_str, progress=False)
-
-# Calculate the equity curve for the benchmark strategy
-stock_prices = stock_data['Adj Close']
-benchmark_symbols = ['ADANIENT.NS', 'ADANIPORTS.NS', 'APOLLOHOSP.NS', 'ASIANPAINT.NS', 'AXISBANK.NS', 'BAJAJ-AUTO.NS', 'BAJFINANCE.NS',             
-                                 'BAJAJFINSV.NS', 'BPCL.NS', 'BHARTIARTL.NS', 'BRITANNIA.NS', 'CIPLA.NS', 'COALINDIA.NS', 'DIVISLAB.NS', 'DRREDDY.NS',             
-                                 'EICHERMOT.NS', 'GRASIM.NS', 'HCLTECH.NS', 'HDFCBANK.NS', 'HDFCLIFE.NS', 'HEROMOTOCO.NS', 'HINDALCO.NS',             
-                                 'HINDUNILVR.NS', 'HDFC.NS', 'ICICIBANK.NS', 'ITC.NS', 'INDUSINDBK.NS', 'INFY.NS', 'JSWSTEEL.NS', 'KOTAKBANK.NS',             
-                                 'LT.NS', 'M&M.NS', 'MARUTI.NS', 'NTPC.NS', 'NESTLEIND.NS', 'ONGC.NS', 'POWERGRID.NS', 'RELIANCE.NS', 'SBILIFE.NS',             
-                                 'SBIN.NS', 'SUNPHARMA.NS', 'TCS.NS', 'TATACONSUM.NS', 'TATAMOTORS.NS', 'TATASTEEL.NS', 'TECHM.NS', 'TITAN.NS',             
-                                 'UPL.NS', 'ULTRACEMCO.NS', 'WIPRO.NS']
-
-benchmark_data = yf.download(benchmark_symbols, start=start_date_str, end=end_date_str, progress=False)
-benchmark_prices = benchmark_data['Adj Close']
-benchmark_weights = initial_equity / len(benchmark_symbols)
-benchmark_portfolio = benchmark_weights * (benchmark_prices / benchmark_prices.iloc[0]).sum(axis=1)
-
-# Calculate the equity curve for the sample strategy
-returns = stock_prices.pct_change(periods=performance_days) + 1
-sample_returns = returns.iloc[-1].sort_values(ascending=False)
-sample_stocks = sample_returns[:top_stock_count].index.tolist()
-sample_weights = initial_equity / top_stock_count
-sample_portfolio = sample_weights * (stock_prices[sample_stocks] / stock_prices.iloc[0]).sum(axis=1)
-
-# Calculate the equity curve for the Nifty index
-nifty_weights = initial_equity / nifty_data['Adj Close'].iloc[0]
-nifty_portfolio = nifty_weights * nifty_data['Adj Close']
-
-# Plot the equity curves
-plt.figure(figsize=(10, 6))
-plt.plot(benchmark_portfolio.index, benchmark_portfolio, label='Benchmark')
-plt.plot(sample_portfolio.index, sample_portfolio, label='Sample Strategy')
-plt.plot(nifty_portfolio.index, nifty_portfolio, label='Nifty Index')
-plt.xlabel('Date')
-plt.ylabel('Equity')
-plt.title('Portfolio Equity Curve')
-plt.legend()
-plt.grid(True)
-
-# Display the plot
-plt.show()
-
-# Display the stocks selected for the sample strategy
-print("Stocks selected for the sample strategy:")
-print(top10stocks(n_years))
-
-# Calculate performance metrics
-benchmark_cagr = (benchmark_portfolio[-1] / benchmark_portfolio[0]) ** (252 / len(benchmark_portfolio)) - 1
-sample_cagr = (sample_portfolio[-1] / sample_portfolio[0]) ** (252 / len(sample_portfolio)) - 1
-nifty_cagr = (nifty_portfolio[-1] / nifty_portfolio[0]) ** (252 / len(nifty_portfolio)) - 1
-
-benchmark_volatility = np.std(benchmark_portfolio.pct_change()) * np.sqrt(252)
-sample_volatility = np.std(sample_portfolio.pct_change()) * np.sqrt(252)
-nifty_volatility = np.std(nifty_portfolio.pct_change()) * np.sqrt(252)
-
-benchmark_sharpe_ratio = benchmark_cagr / benchmark_volatility
-sample_sharpe_ratio = sample_cagr / sample_volatility
-nifty_sharpe_ratio = nifty_cagr / nifty_volatility
-
-# Create a DataFrame for the performance metrics
-data = {
-    'Metric': ['Benchmark CAGR', 'Sample Strategy CAGR', 'Nifty Index CAGR',
-               'Benchmark Volatility', 'Sample Strategy Volatility', 'Nifty Index Volatility',
-               'Benchmark Sharpe Ratio', 'Sample Strategy Sharpe Ratio', 'Nifty Index Sharpe Ratio'],
-    'Value': [benchmark_cagr, sample_cagr, nifty_cagr,
-              benchmark_volatility, sample_volatility, nifty_volatility,
-              benchmark_sharpe_ratio, sample_sharpe_ratio, nifty_sharpe_ratio]
-}
-df = pd.DataFrame(data)
-
-# Display the table
-print("Performance Metrics:")
-print(df)
-
-# Create DataFrame for sample portfolio's CAGR
-sample_cagr_df = pd.DataFrame({'Company': sample_portfolio.index, 'CAGR': sample_portfolio.values})
-
-# Bar graph for sample portfolio's CAGR
-bar_chart_sample_cagr = alt.Chart(sample_cagr_df).mark_bar().encode(
-    y='CAGR',
-    x=alt.X('Company', sort='-x')
+# ---------------------------------------------------------------------------
+# Page config
+# ---------------------------------------------------------------------------
+st.set_page_config(page_title="NIFTY50 Portfolio Analyser", layout="wide")
+st.title("📈 NIFTY50 Equity Portfolio Analyser")
+st.markdown(
+    "Compare a **momentum-based** stock selection strategy against the "
+    "equal-weight NIFTY50 benchmark and the index itself."
 )
 
-# Display the bar chart
-print("Sample Portfolio - CAGR")
-bar_chart_sample_cagr.show()
+# ---------------------------------------------------------------------------
+# Sidebar controls
+# ---------------------------------------------------------------------------
+st.sidebar.header("Parameters")
+
+start_date = st.sidebar.date_input("Start Date", datetime.date(2020, 1, 1))
+end_date = st.sidebar.date_input("End Date", datetime.date.today())
+
+if start_date >= end_date:
+    st.error("Start date must be before end date.")
+    st.stop()
+
+performance_days = st.sidebar.slider(
+    "Momentum Lookback (trading days)", min_value=20, max_value=252, value=100
+)
+top_stock_count = st.sidebar.slider(
+    "Number of Top Stocks", min_value=3, max_value=20, value=10
+)
+initial_equity = st.sidebar.number_input(
+    "Initial Capital (₹)", value=1_000_000, step=100_000, min_value=10_000
+)
+n_years = st.sidebar.slider(
+    "Years to rank top stocks over", min_value=1, max_value=7, value=1
+)
+
+start_str = start_date.strftime('%Y-%m-%d')
+end_str   = end_date.strftime('%Y-%m-%d')
+
+# ---------------------------------------------------------------------------
+# Data loading  (cached so re-runs don't re-download)
+# ---------------------------------------------------------------------------
+@st.cache_data(show_spinner=False)
+def load_stock_prices(start: str, end: str) -> pd.DataFrame:
+    data = yf.download(
+        NIFTY50_SYMBOLS,
+        start=start,
+        end=end,
+        auto_adjust=True,
+        progress=False,
+    )
+    return data['Close']
+
+
+@st.cache_data(show_spinner=False)
+def load_nifty(start: str, end: str) -> pd.Series:
+    data = yf.download('^NSEI', start=start, end=end, auto_adjust=True, progress=False)
+    return data['Close'].squeeze()
+
+
+@st.cache_data(show_spinner=False)
+def get_top_stocks(n_years: int, top_n: int) -> list:
+    return top10stocks(n_years, top_n)
+
+
+with st.spinner("Fetching market data from Yahoo Finance…"):
+    try:
+        stock_prices = load_stock_prices(start_str, end_str)
+        nifty_prices = load_nifty(start_str, end_str)
+        sample_stocks = get_top_stocks(n_years, top_stock_count)
+    except Exception as e:
+        st.error(f"Failed to load data: {e}")
+        st.stop()
+
+if stock_prices.empty or nifty_prices.empty:
+    st.error("No data returned for the selected date range. Try widening the range.")
+    st.stop()
+
+# ---------------------------------------------------------------------------
+# Portfolio construction
+# ---------------------------------------------------------------------------
+
+# 1. Equal-weight benchmark — all 50 NIFTY stocks
+benchmark_prices = stock_prices.dropna(axis=1, how='all')
+benchmark_weights = initial_equity / len(benchmark_prices.columns)
+normalised_benchmark = benchmark_prices / benchmark_prices.iloc[0]
+benchmark_portfolio = benchmark_weights * normalised_benchmark.sum(axis=1)
+
+# 2. Momentum strategy — top-N stocks selected above
+available_samples = [s for s in sample_stocks if s in stock_prices.columns]
+if not available_samples:
+    st.error("None of the selected momentum stocks have data in this date range.")
+    st.stop()
+
+sample_prices = stock_prices[available_samples].dropna(how='all')
+sample_weights = initial_equity / len(available_samples)
+normalised_sample = sample_prices / sample_prices.iloc[0]
+sample_portfolio = sample_weights * normalised_sample.sum(axis=1)
+
+# 3. NIFTY index
+nifty_portfolio = (initial_equity / nifty_prices.iloc[0]) * nifty_prices
+
+# ---------------------------------------------------------------------------
+# Equity curve chart
+# ---------------------------------------------------------------------------
+st.subheader("Portfolio Equity Curve")
+
+fig, ax = plt.subplots(figsize=(12, 5))
+ax.plot(benchmark_portfolio.index, benchmark_portfolio,
+        label='NIFTY50 Equal-Weight Benchmark', linewidth=1.8)
+ax.plot(sample_portfolio.index, sample_portfolio,
+        label=f'Top-{len(available_samples)} Momentum Strategy', linewidth=1.8)
+ax.plot(nifty_portfolio.index, nifty_portfolio,
+        label='NIFTY Index (^NSEI)', linewidth=1.5, linestyle='--', alpha=0.8)
+ax.set_xlabel('Date')
+ax.set_ylabel('Portfolio Value (₹)')
+ax.set_title('Equity Curve Comparison')
+ax.legend()
+ax.grid(True, alpha=0.3)
+fig.tight_layout()
+st.pyplot(fig)
+plt.close(fig)
+
+# ---------------------------------------------------------------------------
+# Performance metrics table
+# ---------------------------------------------------------------------------
+st.subheader("Performance Metrics")
+
+metrics_df = pd.DataFrame({
+    'Strategy': [
+        'NIFTY50 Equal-Weight',
+        f'Top-{len(available_samples)} Momentum',
+        'NIFTY Index (^NSEI)',
+    ],
+    'CAGR': [
+        f"{cagr(benchmark_portfolio)*100:.2f}%",
+        f"{cagr(sample_portfolio)*100:.2f}%",
+        f"{cagr(nifty_portfolio)*100:.2f}%",
+    ],
+    'Ann. Volatility': [
+        f"{annualised_volatility(benchmark_portfolio)*100:.2f}%",
+        f"{annualised_volatility(sample_portfolio)*100:.2f}%",
+        f"{annualised_volatility(nifty_portfolio)*100:.2f}%",
+    ],
+    'Sharpe Ratio': [
+        f"{sharpe_ratio(benchmark_portfolio):.2f}",
+        f"{sharpe_ratio(sample_portfolio):.2f}",
+        f"{sharpe_ratio(nifty_portfolio):.2f}",
+    ],
+    'Max Drawdown': [
+        f"{max_drawdown(benchmark_portfolio)*100:.2f}%",
+        f"{max_drawdown(sample_portfolio)*100:.2f}%",
+        f"{max_drawdown(nifty_portfolio)*100:.2f}%",
+    ],
+})
+
+st.dataframe(metrics_df, use_container_width=True, hide_index=True)
+
+# ---------------------------------------------------------------------------
+# Selected stocks + individual return bar chart
+# ---------------------------------------------------------------------------
+st.subheader(f"Top-{len(available_samples)} Momentum Holdings")
+st.write(", ".join(available_samples))
+
+stock_returns = {}
+for sym in available_samples:
+    series = stock_prices[sym].dropna()
+    if len(series) >= 2:
+        ret = (series.iloc[-1] - series.iloc[0]) / series.iloc[0] * 100
+        stock_returns[sym] = round(float(ret), 2)
+
+returns_df = (
+    pd.DataFrame(list(stock_returns.items()), columns=['Stock', 'Total Return (%)'])
+    .sort_values('Total Return (%)', ascending=False)
+    .reset_index(drop=True)
+)
+
+bar_chart = (
+    alt.Chart(returns_df)
+    .mark_bar()
+    .encode(
+        x=alt.X('Stock:N', sort='-y', title='Stock'),
+        y=alt.Y('Total Return (%):Q', title='Total Return (%)'),
+        color=alt.condition(
+            alt.datum['Total Return (%)'] > 0,
+            alt.value('#2ecc71'),
+            alt.value('#e74c3c'),
+        ),
+        tooltip=['Stock', 'Total Return (%)'],
+    )
+    .properties(
+        title=f'Individual Stock Returns — Top {len(available_samples)} Holdings',
+        height=350,
+    )
+)
+
+st.altair_chart(bar_chart, use_container_width=True)
+
+# ---------------------------------------------------------------------------
+# Footer
+# ---------------------------------------------------------------------------
+st.markdown("---")
+st.caption(
+    "Data sourced from Yahoo Finance via yfinance. "
+    "Past performance is not indicative of future results. "
+    "This tool is for educational purposes only."
+)
