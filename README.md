@@ -15,7 +15,11 @@ A Streamlit web app that compares a **momentum-based stock selection strategy** 
 All three are plotted as equity curves, and the app reports CAGR, annualised volatility, Sharpe ratio (6.5% risk-free rate), and max drawdown for each.
 
 ---
+Example:
+<img width="1465" height="645" alt="image" src="https://github.com/user-attachments/assets/d530cff1-3f6d-4d89-9746-2989212b1d8b" />
+<img width="1016" height="652" alt="image" src="https://github.com/user-attachments/assets/aeaf4b11-cb24-4eab-9eac-9f9de2e0fee2" />
 
+---
 ## Tech stack
 
 | Layer | Library |
